@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zomato-like App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        header {
+            background-color: #ff6347; /* Tomato color */
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 36px;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin: 30px;
+        }
+
+        .dish-list {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .dish-item {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 15px;
+            width: 200px;
+            text-align: center;
+            margin: 10px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .dish-item button {
+            background-color: #ff6347; /* Tomato color */
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .dish-item button:hover {
+            background-color: #e5533d; /* Darker tomato color */
+        }
+
+        .cart {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 600px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .cart h3 {
+            margin-top: 0;
+        }
+
+        .cart-item {
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-item span {
+            font-weight: bold;
+        }
+
+        .cart-item button {
+            background-color: #ff6347; /* Tomato color */
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .cart-item button:hover {
+            background-color: #e5533d; /* Darker tomato color */
+        }
+
+        .cart-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .cart-footer button {
+            background-color: #ff6347; /* Tomato color */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .cart-footer button:hover {
+            background-color: #e5533d; /* Darker tomato color */
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Welcome to the SwiZO App</h1>
+    </header>
+
+    <div class="container">
+        <h2>Order Your Favorite Dishes!</h2>
+
+        <!-- List of dishes -->
+        <div class="dish-list">
+            <div class="dish-item">
+                <h3>Biriyani</h3>
+                <button class="add-to-cart" data-item="Biriyani" data-price="150">Add to Cart</button>
+            </div>
+            <div class="dish-item">
+                <h3>Paneer</h3>
+                <button class="add-to-cart" data-item="Paneer" data-price="100">Add to Cart</button>
+            </div>
+            <div class="dish-item">
+                <h3>Butter Chicken</h3>
+                <button class="add-to-cart" data-item="Butter Chicken" data-price="200">Add to Cart</button>
+            </div>
+            <!-- Add more dishes here -->
+        </div>
+
+        <!-- Cart Section -->
+        <div class="cart">
+            <h3>Your Cart:</h3>
+            <ul id="cart-list">
+                <!-- Cart items will be dynamically added here -->
+            </ul>
+            <div class="cart-footer">
+                <div>
+                    <label for="name">Name:</label><br>
+                    <input type="text" id="name" placeholder="Enter your name" required><br>
+                    <label for="phone">Phone Number:</label><br>
+                    <input type="text" id="phone" placeholder="Enter your phone number" required><br>
+                    <label for="address">Delivery Address:</label><br>
+                    <input type="text" id="address" placeholder="Enter your address" required>
+                </div>
+                <button onclick="placeOrder()" class="button">Place Order</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let cart = [];
+
+        // Add item to cart
+        document.querySelectorAll('.add-to-cart').forEach(button => {
+            button.addEventListener('click', function () {
+                const itemName = this.getAttribute('data-item');
+                const itemPrice = parseFloat(this.getAttribute('data-price'));
+
+                // Check if item is already in cart
+                const existingItem = cart.find(item => item.name === itemName);
+                if (existingItem) {
+                    existingItem.quantity += 1;
+                } else {
+                    cart.push({ name: itemName, price: itemPrice, quantity: 1 });
+                }
+
+                // Update cart UI
+                updateCart();
+            });
+        });
+
+        // Update the cart UI
+        function updateCart() {
+            const cartList = document.getElementById('cart-list');
+            cartList.innerHTML = '';
+
+            cart.forEach(item => {
+                const cartItem = document.createElement('li');
+                cartItem.classList.add('cart-item');
+                cartItem.innerHTML = `
+                    <span>${item.name} x${item.quantity} - ₹${item.price * item.quantity}</span>
+                    <button onclick="removeFromCart('${item.name}')">Remove</button>
+                `;
+                cartList.appendChild(cartItem);
+            });
+        }
+
+        // Remove item from cart
+        function removeFromCart(itemName) {
+            cart = cart.filter(item => item.name !== itemName);
+            updateCart();
+        }
+
+        // Place the order
+        function placeOrder() {
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const address = document.getElementById('address').value;
+            if (cart.length === 0) {
+                alert('Please add items to your cart.');
+                return;
+            }
+            if (!name || !phone || !address) {
+                alert('Please enter your name, phone number, and delivery address.');
+                return;
+            }
+
+            // Send the order details to the backend (for now, just log the order)
+            const orderDetails = {
+                name: name,
+                phone: phone,
+                address: address,
+                cart: cart
+            };
+            console.log('Order placed:', orderDetails);
+
+            // Send the order to Flask backend using fetch
+            fetch('/place_order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(orderDetails)  // Send the data as JSON
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.message) {
+                    alert('Order placed successfully!');
+                    // Reset the cart
+                    cart = [];
+                    updateCart();
+                    document.getElementById('name').value = '';  // Clear the name field
+                    document.getElementById('phone').value = '';  // Clear the phone field
+                    document.getElementById('address').value = '';  // Clear the address field
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Something went wrong!');
+            });
+        }
+    </script>
+</body>
+</html>
